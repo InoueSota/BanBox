@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AllObjectManager : MonoBehaviour
@@ -10,14 +8,7 @@ public class AllObjectManager : MonoBehaviour
     {
         GROUND,
         BLOCK,
-        ITEM,
-        GRASSPARENT,
-        DRIPSTONE,
-        BOMB,
-        SPLIT,
-        CACTUS,
-        ICICLE,
-        DEATHWARP
+        BOX
     }
     [SerializeField] private ObjectType objectType;
 
@@ -59,20 +50,6 @@ public class AllObjectManager : MonoBehaviour
     }
     public bool GetIsHitObject()
     {
-        if (objectType == ObjectType.ITEM ||
-            objectType == ObjectType.GRASSPARENT ||
-            objectType == ObjectType.DEATHWARP)
-        {
-            return false;
-        }
         return true;
-    }
-    public bool GetIsJudgeObject()
-    {
-        if (objectType == ObjectType.SPLIT)
-        {
-            return true;
-        }
-        return false;
     }
 }

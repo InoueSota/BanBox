@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActive: 1
-  objectType: 0
+  objectType: 1
   hp: 0
 --- !u!61 &5944863806251853217
 BoxCollider2D:

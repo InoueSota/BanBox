@@ -71,6 +71,8 @@ MonoBehaviour:
   hitHeadHangTime: 0.3
   gravityMax: 12
   addGravity: 25
+  dropAmount: 16
+  breakDistance: 4.9
 --- !u!114 &5535048817972948171
 MonoBehaviour:
   m_ObjectHideFlags: 0
