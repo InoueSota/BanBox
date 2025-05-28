@@ -65,9 +65,9 @@ MonoBehaviour:
   maxSpeed: 3.7
   maxAcceleration: 2.2
   accelerationTime: 0.6
-  jumpDistance: 1
-  jumpSpeed: 15
-  hangTime: 0.15
+  jumpDistance: 2
+  jumpSpeed: 10
+  hangTime: 0.1
   hitHeadHangTime: 0.3
   gravityMax: 12
   addGravity: 25
