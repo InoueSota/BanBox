@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class PlayerMoveManager : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     // 自コンポーネント取得
     private PlayerManager manager;

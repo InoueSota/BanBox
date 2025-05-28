@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour
 {
     // 自コンポーネント取得
-    private PlayerMoveManager moveManager;
+    private PlayerController controller;
     private PlayerHitManager hitManager;
 
     // Other Objects
@@ -19,7 +19,7 @@ public class PlayerManager : MonoBehaviour
     void Start()
     {
         // Set Component
-        moveManager = GetComponent<PlayerMoveManager>();
+        controller = GetComponent<PlayerController>();
         hitManager = GetComponent<PlayerHitManager>();
 
         // Set Component - Other
@@ -27,14 +27,14 @@ public class PlayerManager : MonoBehaviour
         
         canGetInput = true;
         isActive = true;
-        moveManager.Initialize();
+        controller.Initialize();
     }
 
     void Update()
     {
         inputManager.GetAllInput();
 
-        moveManager.ManualUpdate();
+        controller.ManualUpdate();
     }
 
     // Setter
@@ -52,7 +52,7 @@ public class PlayerManager : MonoBehaviour
     }
     public void Initialize()
     {
-        moveManager.Initialize();
+        controller.Initialize();
     }
 
     // Getter
