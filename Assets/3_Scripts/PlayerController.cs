@@ -493,7 +493,7 @@ public class PlayerController : MonoBehaviour
                         // íiÉ{Å[ÉãÇ™Ç†Ç¡ÇΩÇÁîjâÛÇ∑ÇÈ
                         if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
                         {
-                            Destroy(obj);
+                            obj.GetComponent<BoxManager>().DestroySelf(Vector3.down);
                             break;
                         }
                     }
@@ -627,6 +627,8 @@ public class PlayerController : MonoBehaviour
     // Setter
     public void SetExplosionMove(Vector3 _explosionMoveDirection)
     {
+        isDropping = false;
+
         if (!isExplositionMove)
         {
             dropTarget.x = Mathf.Round(transform.position.x);
