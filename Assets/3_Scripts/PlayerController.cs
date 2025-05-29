@@ -192,19 +192,22 @@ public class PlayerController : MonoBehaviour
 
                     if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
-                        // 段ボールに横から触れたとき
-                        CheckPush(obj);
-
                         // プレイヤーが右側
                         if (nextPosition.x > obj.transform.position.x)
                         {
                             nextPosition.x = obj.transform.position.x + 0.5f + halfSize.x;
+
+                            // 段ボールに右から左に触れたとき
+                            if (moveDirection == Vector3.left) { CheckPush(obj); }
                             break;
                         }
                         // プレイヤーが左側
                         else
                         {
                             nextPosition.x = obj.transform.position.x - 0.5f - halfSize.x;
+
+                            // 段ボールに右から左に触れたとき
+                            if (moveDirection == Vector3.right) { CheckPush(obj); }
                             break;
                         }
                     }
