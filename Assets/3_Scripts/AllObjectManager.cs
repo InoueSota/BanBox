@@ -12,34 +12,13 @@ public class AllObjectManager : MonoBehaviour
     }
     [SerializeField] private ObjectType objectType;
 
-    [Header("HP")]
-    [SerializeField] private int hp;
-    private int maxHp;
-
-    void Start()
-    {
-        maxHp = hp;
-    }
-
     // Setter
-    public void Initialize()
-    {
-        hp = maxHp;
-    }
-    public void Damage()
-    {
-        hp--;
-    }
     public void SetIsActive (bool _isActive)
     {
         isActive = _isActive;
     }
     
     // Getter
-    public int GetHp()
-    {
-        return hp;
-    }
     public bool GetIsActive()
     {
         return isActive;
