@@ -491,21 +491,21 @@ public class PlayerController : MonoBehaviour
                 if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                 {
                     // 破壊の高さに足りているか
-                    if (canBreakBox)
-                    {
-                        // 段ボールがあったら破壊する
-                        if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
-                        {
-                            obj.GetComponent<BoxManager>().DestroySelf(Vector3.down);
-                            break;
-                        }
-                    }
-                    else if (canBreakAll)
+                    if (canBreakAll)
                     {
                         // 段ボールがあったら破壊する
                         if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() != AllObjectManager.ObjectType.GROUND)
                         {
                             Destroy(obj);
+                            break;
+                        }
+                    }
+                    else if (canBreakBox)
+                    {
+                        // 段ボールがあったら破壊する
+                        if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                        {
+                            obj.GetComponent<BoxManager>().DestroySelf(Vector3.down);
                             break;
                         }
                     }
