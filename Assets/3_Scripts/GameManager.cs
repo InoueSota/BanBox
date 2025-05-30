@@ -17,8 +17,8 @@ public class GameManager : MonoBehaviour
         // 入力状況を取得する
         inputManager.GetAllInput();
 
-        // Rキーを推すことで完全リセットを行う
-        if (Input.GetKey(KeyCode.R)) { SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
+        // 完全リセット
+        if (inputManager.IsTrgger(inputManager.reset)) { SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
     }
 
     void LateUpdate()

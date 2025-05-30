@@ -30,12 +30,16 @@ public class InputManager : MonoBehaviour
     public InputPattern horizontal;
     public InputPattern vertical;
     public InputPattern jump;
+    public InputPattern reset;
+    public InputPattern cancel;
 
     void Start()
     {
         horizontal = new InputPattern();
         vertical = new InputPattern();
         jump = new InputPattern();
+        reset = new InputPattern();
+        cancel = new InputPattern();
     }
 
     public void SetIsGetInput()
@@ -43,6 +47,8 @@ public class InputManager : MonoBehaviour
         horizontal.SetIsGetInput(false);
         vertical.SetIsGetInput(false);
         jump.SetIsGetInput(false);
+        reset.SetIsGetInput(false);
+        cancel.SetIsGetInput(false);
     }
 
     public void GetAllInput()
@@ -50,6 +56,8 @@ public class InputManager : MonoBehaviour
         horizontal.GetInput("Horizontal");
         vertical.GetInput("Vertical");
         jump.GetInput("Jump");
+        reset.GetInput("Reset");
+        cancel.GetInput("Cancel");
     }
 
     public bool IsTrgger(InputPattern _inputPattern)
