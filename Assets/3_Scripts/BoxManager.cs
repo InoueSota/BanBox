@@ -189,6 +189,8 @@ public class BoxManager : MonoBehaviour
     public void FinishBeingPushed()
     {
         isBeingPushed = false;
+        isGravity = true;
+        gravityPower = 0f;
         nextPosition = transform.position;
     }
     public void SetIsExplosionMove(Vector3 _explosionMoveDirection, Vector3 _position, float _pushTime)
@@ -229,6 +231,8 @@ public class BoxManager : MonoBehaviour
     public void FinishExplosionMove()
     {
         isExplosionMove = false;
+        isGravity = true;
+        gravityPower = 0f;
         nextPosition = transform.position;
     }
 
