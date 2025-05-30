@@ -178,7 +178,10 @@ public class BoxManager : MonoBehaviour
                         _objBoxManager.SetIsBeingPushed(_moveDirection, _pushTime);
                         break;
                     }
-                    DestroySelf(_moveDirection);
+                    else if (obj.GetComponent<AllObjectManager>().GetObjectType() != AllObjectManager.ObjectType.BOX)
+                    {
+                        DestroySelf(_moveDirection);
+                    }
                 }
             }
         }
