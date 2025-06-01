@@ -58,5 +58,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nextSceneName: Stage2
-  changeSceneIntervalTime: 3
+  changeSceneIntervalTime: 1.5
   clearTextObj: {fileID: 0}

@@ -29,11 +29,10 @@ public class BoxManager : MonoBehaviour
     // 吹っ飛んでいるかフラグ
     private bool isExplosionMove;
 
-    [Header("重力")]
-    [SerializeField] private float gravityMax;
-    [SerializeField] private float addGravity;
-    private bool isGravity;
-    private float gravityPower;
+    [Header("落下")]
+    [SerializeField] private float dropAmount;
+    private Vector3 dropTarget;
+    private bool isDropping;
 
     void Start()
     {
@@ -46,7 +45,7 @@ public class BoxManager : MonoBehaviour
         playerController = playerObj.GetComponent<PlayerController>();
         playerTransform = playerObj.transform;
 
-        isGravity = false;
+        CheckGround();
     }
 
     void Update()
@@ -60,99 +59,130 @@ public class BoxManager : MonoBehaviour
 
     void Gravity()
     {
-        if (!isGravity)
+        if (!isDropping && !isBeingPushed && !isExplosionMove)
         {
-            if (!isBeingPushed && !isExplosionMove)
-            {
-                // ブロックとの衝突判定
-                bool noBlock = true;
-
-                foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
-                {
-                    if (nextPosition.y > obj.transform.position.y)
-                    {
-                        // X軸判定
-                        float xBetween = Mathf.Abs(nextPosition.x - obj.transform.position.x);
-                        float xDoubleSize = halfSize.x + 0.25f;
-
-                        // Y軸判定
-                        float yBetween = Mathf.Abs(nextPosition.y - obj.transform.position.y);
-                        float yDoubleSize = halfSize.y + 0.51f;
-
-                        if (yBetween < yDoubleSize && xBetween < xDoubleSize)
-                        {
-                            if (obj != this && obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
-                            {
-                                noBlock = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (nextPosition.y > playerTransform.position.y)
-                {
-                    // X軸判定
-                    float xBetween = Mathf.Abs(nextPosition.x - playerTransform.position.x);
-                    float xDoubleSize = halfSize.x + 0.25f;
-
-                    // Y軸判定
-                    float yBetween = Mathf.Abs(nextPosition.y - playerTransform.position.y);
-                    float yDoubleSize = halfSize.y + 0.51f;
-
-                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
-                    {
-                        noBlock = false;
-                    }
-                }
-
-                if (noBlock)
-                {
-                    gravityPower = 0f;
-                    isGravity = true;
-                }
-            }
+            CheckGround();
         }
         else
         {
-            gravityPower += addGravity * Time.deltaTime;
 
-            float deltaGravityPower = gravityPower * Time.deltaTime;
-            nextPosition.y -= deltaGravityPower;
+        }
+    }
+    void CheckGround()
+    {
+        // ブロックとの衝突判定
+        bool noBlock = true;
 
-            // ブロックとの衝突判定
-            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+        {
+            if (nextPosition.y > obj.transform.position.y)
             {
-                if (nextPosition.y > obj.transform.position.y)
+                // X軸判定
+                float xBetween = Mathf.Abs(nextPosition.x - obj.transform.position.x);
+                float xDoubleSize = halfSize.x + 0.25f;
+
+                // Y軸判定
+                float yBetween = Mathf.Abs(nextPosition.y - obj.transform.position.y);
+                float yDoubleSize = halfSize.y + 0.51f;
+
+                if (yBetween < yDoubleSize && xBetween < xDoubleSize)
+                {
+                    if (obj != this && obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
+                    {
+                        noBlock = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (nextPosition.y > playerTransform.position.y)
+        {
+            // X軸判定
+            float xBetween = Mathf.Abs(nextPosition.x - playerTransform.position.x);
+            float xDoubleSize = halfSize.x + 0.25f;
+
+            // Y軸判定
+            float yBetween = Mathf.Abs(nextPosition.y - playerTransform.position.y);
+            float yDoubleSize = halfSize.y + 0.51f;
+
+            if (yBetween < yDoubleSize && xBetween < xDoubleSize)
+            {
+                noBlock = false;
+            }
+        }
+
+        if (noBlock)
+        {
+            dropTarget.x = Mathf.Round(transform.position.x);
+            dropTarget.y = Mathf.Round(transform.position.y);
+
+            while (!isDropping)
+            {
+                // ブロックがなかったら次に進める
+                dropTarget += Vector3.down;
+
+                // 落下の終着点等を取得する
+                foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
                 {
                     // X軸判定
-                    float xBetween = Mathf.Abs(nextPosition.x - obj.transform.position.x);
+                    float xBetween = Mathf.Abs(dropTarget.x - obj.transform.position.x);
                     float xDoubleSize = halfSize.x + 0.25f;
 
                     // Y軸判定
-                    float yBetween = Mathf.Abs(nextPosition.y - obj.transform.position.y);
-                    float yDoubleSize = halfSize.y + 0.51f;
+                    float yBetween = Mathf.Abs(dropTarget.y - obj.transform.position.y);
+                    float yDoubleSize = halfSize.y + 0.25f;
 
-                    if (obj != this && obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
+                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
-                        xDoubleSize = halfSize.x + 0.25f;
-
-                        if (yBetween <= yDoubleSize && xBetween < xDoubleSize)
+                        if (obj.GetComponent<AllObjectManager>().GetIsActive())
                         {
-                            nextPosition.y = obj.transform.position.y + 0.5f + halfSize.y;
-                            isGravity = false;
+                            dropTarget = obj.transform.position;
+                            dropTarget -= Vector3.down;
+                            isDropping = true;
                             break;
                         }
                     }
                 }
             }
+
+            // 落下距離を取得
+            float dropDistance = Vector3.Distance(transform.position, dropTarget);
+
+            // 距離によって移動速度が変わらないように調整
+            float dropTime = dropDistance / dropAmount;
+
+            // 落下距離に応じてBoxTypeを変化させる
+            switch (boxType)
+            {
+                case BoxType.HORIZONTAL:
+                    if (Mathf.Round(dropDistance) % 2 == 1) { boxType = BoxType.VERTICAL; }
+                    break;
+                case BoxType.VERTICAL:
+                    if (Mathf.Round(dropDistance) % 2 == 1) { boxType = BoxType.HORIZONTAL; }
+                    break;
+            }
+
+            // 落下開始
+            transform.DOKill();
+            var sequence = DOTween.Sequence();
+            sequence.Append(transform.DOMove(dropTarget, dropTime).SetEase(Ease.InSine));
+            sequence.Join(transform.DORotate(Vector3.forward * (90f * Mathf.Round(dropDistance)), dropTime, RotateMode.WorldAxisAdd).SetEase(Ease.InSine));
+            sequence.Play().OnComplete(FinishDrop);
+
+            isDropping = true;
         }
+    }
+    void FinishDrop()
+    {
+        nextPosition = transform.position;
+        isDropping = false;
     }
 
     // Getter
-    public bool GetIsGravity()
+    public bool GetIsDropping()
     {
-        return isGravity;
+        return isDropping;
     }
     public BoxType GetBoxType()
     {
@@ -181,7 +211,7 @@ public class BoxManager : MonoBehaviour
                     // 段ボールに横から触れたとき
                     BoxManager _objBoxManager = obj.GetComponent<BoxManager>();
 
-                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsGravity())
+                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsDropping())
                     {
                         transform.position = nextPosition;
 
@@ -200,8 +230,7 @@ public class BoxManager : MonoBehaviour
     public void FinishBeingPushed()
     {
         isBeingPushed = false;
-        isGravity = true;
-        gravityPower = 0f;
+        CheckGround();
         nextPosition = transform.position;
     }
     public void SetIsExplosionMove(Vector3 _explosionMoveDirection, Vector3 _position, float _pushTime)
@@ -226,7 +255,7 @@ public class BoxManager : MonoBehaviour
                     // 段ボールに横から触れたとき
                     BoxManager _objBoxManager = obj.GetComponent<BoxManager>();
 
-                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsGravity())
+                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsDropping())
                     {
                         transform.position = nextPosition;
 
@@ -242,8 +271,7 @@ public class BoxManager : MonoBehaviour
     public void FinishExplosionMove()
     {
         isExplosionMove = false;
-        isGravity = true;
-        gravityPower = 0f;
+        CheckGround();
         nextPosition = transform.position;
     }
 

@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     private PlayerManager manager;
     private bool isPushLeft;
     private bool isPushRight;
+    private bool isPushDown;
     private bool isTriggerJump;
 
     // 基本情報
@@ -92,6 +93,7 @@ public class PlayerController : MonoBehaviour
             Jump();
             Hovering();
             Gravity();
+            Thwart();
             Explosion();
 
             ClampInCamera();
@@ -169,10 +171,8 @@ public class PlayerController : MonoBehaviour
 
                 if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
                 {
-                    if (!isJumping)
-                    {
-                        yDoubleSize = halfSize.y + 0.15f;
-                    }
+                    // ジャンプしていない時は縦幅を少し細くする
+                    if (!isJumping) { yDoubleSize = halfSize.y + 0.15f; }
 
                     if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
@@ -201,14 +201,18 @@ public class PlayerController : MonoBehaviour
     }
     void CheckPush(GameObject _obj)
     {
-        BoxManager _objBoxManager = _obj.GetComponent<BoxManager>();
+        BoxManager _objBoxManager = null;
+        if (_obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX) { _objBoxManager = _obj.GetComponent<BoxManager>(); }
 
-        if (GetIsGround() && _obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsGravity())
+        if (_objBoxManager && GetIsGround() && _objBoxManager.GetBoxType() == BoxManager.BoxType.HORIZONTAL && !_objBoxManager.GetIsDropping())
         {
             transform.position = nextPosition;
 
+            // プレイヤーを動かす
             transform.DOMove(_obj.transform.position, pushTime).SetEase(Ease.OutSine).OnComplete(FinishPush);
+            // 対象の段ボールを動かす
             _obj.transform.DOMove(_obj.transform.position + moveDirection, pushTime).SetEase(Ease.OutSine).OnComplete(_objBoxManager.FinishBeingPushed);
+            // 対象の段ボールの前方に他段ボールがあるか判定し、あれば動かす処理
             _objBoxManager.SetIsBeingPushed(moveDirection, pushTime);
             isPushing = true;
         }
@@ -371,6 +375,30 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+    void Thwart()
+    {
+        if (!isPushing && !isExplositionMove && !isJumping && !isHovering && !isGravity && isPushDown)
+        {
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+            {
+                // X軸判定
+                float xBetween = Mathf.Abs(nextPosition.x - obj.transform.position.x);
+                float xDoubleSize = halfSize.x + 0.25f;
+
+                // Y軸判定
+                float yBetween = Mathf.Abs(nextPosition.y - 1f - obj.transform.position.y);
+                float yDoubleSize = halfSize.y + 0.25f;
+
+                if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                {
+                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
+                    {
+                        if (obj.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL) { obj.GetComponent<BoxManager>().DestroySelf(Vector3.down); }
+                    }
+                }
+            }
+        }
+    }
     void Explosion()
     {
         // 落下中の処理
@@ -399,7 +427,7 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    void FinishDrop()
+    void FinishExplosion()
     {
         nextPosition = transform.position;
         gravityPower = 0f;
@@ -440,23 +468,22 @@ public class PlayerController : MonoBehaviour
     {
         isPushLeft = false;
         isPushRight = false;
+        isPushDown = false;
         isTriggerJump = false;
 
+        // 横入力
         if (manager.GetInputManager().IsPush(manager.GetInputManager().horizontal))
         {
-            if (manager.GetInputManager().ReturnInputValue(manager.GetInputManager().horizontal) < -0.1f)
-            {
-                isPushLeft = true;
-            }
-            else if (manager.GetInputManager().ReturnInputValue(manager.GetInputManager().horizontal) > 0.1f)
-            {
-                isPushRight = true;
-            }
+            if (manager.GetInputManager().ReturnInputValue(manager.GetInputManager().horizontal) < -0.1f) { isPushLeft = true; }
+            else if (manager.GetInputManager().ReturnInputValue(manager.GetInputManager().horizontal) > 0.1f) { isPushRight = true; }
         }
-        if (manager.GetInputManager().IsTrgger(manager.GetInputManager().jump))
+        // 縦入力
+        if (manager.GetInputManager().IsPush(manager.GetInputManager().vertical))
         {
-            isTriggerJump = true;
+            if (manager.GetInputManager().ReturnInputValue(manager.GetInputManager().vertical) < -0.1f) { isPushDown = true; }
         }
+        // ジャンプ
+        if (manager.GetInputManager().IsTrgger(manager.GetInputManager().jump)) { isTriggerJump = true; }
     }
     public bool GetIsGround()
     {
@@ -551,7 +578,7 @@ public class PlayerController : MonoBehaviour
 
         // 吹っ飛び開始
         transform.DOKill();
-        transform.DOMove(explosionTarget, dropTime).SetEase(Ease.OutSine).OnComplete(FinishDrop);
+        transform.DOMove(explosionTarget, dropTime).SetEase(Ease.OutSine).OnComplete(FinishExplosion);
 
         // 隣にアクティブな段ボールがあったらそれも吹き飛ばす
         foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
