@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: df46277f6d4211041bc046f7c2876c56, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8d20719eb8c17e146b6d00c6f8436cbf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -177,7 +177,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 7
+  m_Constraints: 0
 --- !u!114 &-9161019172296211190
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,5 +190,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18ec3235a24d53c4b99773a5c4750277, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  horizontalBoxSprite: {fileID: 21300000, guid: df46277f6d4211041bc046f7c2876c56, type: 3}
   boxType: 1
   dropAmount: 5

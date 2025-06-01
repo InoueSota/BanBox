@@ -201,20 +201,85 @@ public class PlayerController : MonoBehaviour
     }
     void CheckPush(GameObject _obj)
     {
-        BoxManager _objBoxManager = null;
-        if (_obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX) { _objBoxManager = _obj.GetComponent<BoxManager>(); }
+        bool noBlock = true;
+        bool finishCheck = false;
+        bool canPush = true;
+        Vector3 checkPosition = transform.position + moveDirection;
 
-        if (_objBoxManager && GetIsGround() && _objBoxManager.GetBoxType() == BoxManager.BoxType.HORIZONTAL && !_objBoxManager.GetIsDropping())
+        while (!finishCheck)
         {
-            transform.position = nextPosition;
+            bool empty = true;
 
-            // プレイヤーを動かす
-            transform.DOMove(_obj.transform.position, pushTime).SetEase(Ease.OutSine).OnComplete(FinishPush);
-            // 対象の段ボールを動かす
-            _obj.transform.DOMove(_obj.transform.position + moveDirection, pushTime).SetEase(Ease.OutSine).OnComplete(_objBoxManager.FinishBeingPushed);
-            // 対象の段ボールの前方に他段ボールがあるか判定し、あれば動かす処理
-            _objBoxManager.SetIsBeingPushed(moveDirection, pushTime);
-            isPushing = true;
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+            {
+                // X軸判定
+                float xBetween = Mathf.Abs(checkPosition.x - obj.transform.position.x);
+                float xDoubleSize = halfSize.x + 0.25f;
+
+                // Y軸判定
+                float yBetween = Mathf.Abs(checkPosition.y - obj.transform.position.y);
+                float yDoubleSize = halfSize.y + 0.25f;
+
+                if (yBetween < yDoubleSize && xBetween < xDoubleSize && obj.GetComponent<AllObjectManager>().GetIsActive())
+                {
+                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND || obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BLOCK)
+                    {
+                        empty = false;
+
+                        foreach (GameObject obj2 in GameObject.FindGameObjectsWithTag("Object"))
+                        {
+                            // X軸判定
+                            float xBetween2 = Mathf.Abs(checkPosition.x - moveDirection.x - obj2.transform.position.x);
+                            float xDoubleSize2 = halfSize.x + 0.25f;
+
+                            // Y軸判定
+                            float yBetween2 = Mathf.Abs(checkPosition.y - obj2.transform.position.y);
+                            float yDoubleSize2 = halfSize.y + 0.25f;
+
+                            if (yBetween2 < yDoubleSize2 && xBetween2 < xDoubleSize2 && obj2.GetComponent<AllObjectManager>().GetIsActive() && obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                            {
+                                if(obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.HORIZONTAL)
+                                {
+                                    finishCheck = true;
+                                    break;
+                                }
+                                else if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL)
+                                {
+                                    canPush = false;
+                                    finishCheck = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX) { empty = false; }
+                }
+            }
+
+            // 空白の１マス
+            if (empty) { finishCheck = true; break; }
+
+            // 判定座標を進める
+            checkPosition += moveDirection;
+        }
+
+        if (noBlock && canPush)
+        {
+            BoxManager _objBoxManager = null;
+            if (_obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX) { _objBoxManager = _obj.GetComponent<BoxManager>(); }
+
+            if (_objBoxManager && GetIsGround() && !_objBoxManager.GetIsDropping())
+            {
+                transform.position = nextPosition;
+
+                // プレイヤーを動かす
+                transform.DOMove(_obj.transform.position, pushTime).SetEase(Ease.OutSine).OnComplete(FinishPush);
+                // 対象の段ボールを動かす
+                _obj.transform.DOMove(_obj.transform.position + moveDirection, pushTime).SetEase(Ease.OutSine).OnComplete(_objBoxManager.FinishBeingPushed);
+                // 対象の段ボールの前方に他段ボールがあるか判定し、あれば動かす処理
+                _objBoxManager.SetIsBeingPushed(moveDirection, pushTime);
+                isPushing = true;
+            }
         }
     }
     void FinishPush()

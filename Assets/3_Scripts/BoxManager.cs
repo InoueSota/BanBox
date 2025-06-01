@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class BoxManager : MonoBehaviour
 {
+    // My Component
+    [Header("横向き画像")]
+    [SerializeField] private Sprite horizontalBoxSprite;
+    private SpriteRenderer spriteRenderer;
+
     // 他コンポーネント
     private GameObject playerObj;
     private PlayerController playerController;
@@ -36,9 +41,21 @@ public class BoxManager : MonoBehaviour
 
     void Start()
     {
+        // Sprite
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = horizontalBoxSprite;
+
         originPosition = transform.position;
         halfSize.x = transform.localScale.x * 0.5f;
         halfSize.y = transform.localScale.y * 0.5f;
+
+        // Rotation
+        switch (boxType)
+        {
+            case BoxType.VERTICAL:
+                transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                break;
+        }
 
         // Set Component - Other
         playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -62,10 +79,6 @@ public class BoxManager : MonoBehaviour
         if (!isDropping && !isBeingPushed && !isExplosionMove)
         {
             CheckGround();
-        }
-        else
-        {
-
         }
     }
     void CheckGround()

@@ -190,5 +190,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18ec3235a24d53c4b99773a5c4750277, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  horizontalBoxSprite: {fileID: 21300000, guid: df46277f6d4211041bc046f7c2876c56, type: 3}
   boxType: 0
   dropAmount: 5
