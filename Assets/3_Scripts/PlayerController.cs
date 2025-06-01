@@ -252,7 +252,7 @@ public class PlayerController : MonoBehaviour
                             }
                         }
                     }
-                    else if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX) { empty = false; }
+                    else if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !obj.GetComponent<BoxManager>().GetIsDropping()) { empty = false; }
                 }
             }
 

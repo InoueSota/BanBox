@@ -100,7 +100,11 @@ public class BoxManager : MonoBehaviour
 
                 if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                 {
-                    if (obj != this && obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
+                    if (obj != this && obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && obj.GetComponent<BoxManager>().GetIsDropping())
+                    {
+                        break;
+                    }
+                    else if (obj != this && obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
                     {
                         noBlock = false;
                         break;
@@ -130,6 +134,8 @@ public class BoxManager : MonoBehaviour
             dropTarget.x = Mathf.Round(transform.position.x);
             dropTarget.y = Mathf.Round(transform.position.y);
 
+            int droppingCount = 1;
+
             while (!isDropping)
             {
                 // ブロックがなかったら次に進める
@@ -148,10 +154,15 @@ public class BoxManager : MonoBehaviour
 
                     if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
-                        if (obj.GetComponent<AllObjectManager>().GetIsActive())
+                        if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && obj.GetComponent<BoxManager>().GetIsDropping())
+                        {
+                            droppingCount++;
+                            break;
+                        }
+                        else if (obj.GetComponent<AllObjectManager>().GetIsActive())
                         {
                             dropTarget = obj.transform.position;
-                            dropTarget -= Vector3.down;
+                            dropTarget -= Vector3.down * droppingCount;
                             isDropping = true;
                             break;
                         }
