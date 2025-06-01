@@ -1,6 +1,5 @@
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class PlayerController : MonoBehaviour
 {
@@ -50,21 +49,10 @@ public class PlayerController : MonoBehaviour
     private bool isGravity;
     private float gravityPower;
 
-    // 落下初期化
-    private Vector3 dropInitialTarget;
-    private bool isDropInitialize;
-
-    [Header("落下")]
-    [SerializeField] private float dropAmount;
-    [SerializeField] private float breakDistance;
-    private Vector3 dropTarget;
-    private Vector3 dropDirection;
-    private bool canBreakBox;
-    private bool isDropping;
-
-    // 爆発
+    [Header("爆発")]
+    [SerializeField] private float explosionAmount;
+    private Vector3 explosionTarget;
     private bool isExplositionMove;
-    private bool canBreakAll;
 
     void Start()
     {
@@ -75,8 +63,6 @@ public class PlayerController : MonoBehaviour
         cameraHalfSize.x = Camera.main.ScreenToWorldPoint(new(Screen.width, 0f, 0f)).x;
         cameraHalfSize.y = Camera.main.ScreenToWorldPoint(new(0f, Screen.height, 0f)).y;
         originPosition = transform.position;
-
-        isDropping = false;
     }
     public void Initialize()
     {
@@ -84,7 +70,6 @@ public class PlayerController : MonoBehaviour
         isJumping = false;
         isHovering = false;
         isGravity = false;
-        isDropping = false;
         transform.DOKill();
     }
 
@@ -104,11 +89,10 @@ public class PlayerController : MonoBehaviour
             nextPosition = transform.position;
 
             Move();
-            DropInitialize();
-            Dropping();
             Jump();
             Hovering();
             Gravity();
+            Explosion();
 
             ClampInCamera();
 
@@ -118,7 +102,7 @@ public class PlayerController : MonoBehaviour
 
     void CheckDirection()
     {
-        if (!isDropping && !isDropInitialize && (isPushLeft || isPushRight))
+        if (!isExplositionMove && (isPushLeft || isPushRight))
         {
             moveSpeed = maxSpeed + acceleration;
 
@@ -237,7 +221,7 @@ public class PlayerController : MonoBehaviour
     void Jump()
     {
         // ジャンプ開始と初期化
-        if (manager.GetCanJump() && !isPushing && !isDropping && !isDropInitialize && !isJumping && !isHovering && !isGravity && isTriggerJump)
+        if (manager.GetCanJump() && !isPushing && !isExplositionMove && !isJumping && !isHovering && !isGravity && isTriggerJump)
         {
             foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
             {
@@ -317,7 +301,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!isGravity)
         {
-            if (!isDropping && !isDropInitialize && !isJumping && !isHovering)
+            if (!isExplositionMove && !isJumping && !isHovering)
             {
                 // ブロックとの衝突判定
                 bool noBlock = true;
@@ -387,95 +371,10 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    void DropInitialize()
-    {
-        if (!GetIsGround() && isTriggerJump && !isDropInitialize && !isDropping)
-        {
-            dropInitialTarget.x = Mathf.Round(nextPosition.x);
-            dropInitialTarget.y = Mathf.Round(nextPosition.y);
-
-            dropDirection = Vector3.down;
-            dropTarget = dropInitialTarget;
-
-            while (!isDropInitialize)
-            {
-                // ブロックがなかったら次に進める
-                dropTarget += dropDirection;
-
-                // 吹っ飛びの終着点等を取得する
-                foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
-                {
-                    // X軸判定
-                    float xBetween = Mathf.Abs(dropTarget.x - obj.transform.position.x);
-                    float xDoubleSize = halfSize.x + 0.25f;
-
-                    // Y軸判定
-                    float yBetween = Mathf.Abs(dropTarget.y - obj.transform.position.y);
-                    float yDoubleSize = halfSize.y + 0.25f;
-
-                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
-                    {
-                        // ブロックがあったら１つ手前で止める
-                        if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
-                        {
-                            dropTarget = obj.transform.position;
-
-                            if (Vector3.Distance(dropInitialTarget, dropTarget) < breakDistance)
-                            {
-                                dropTarget -= dropDirection;
-                                isDropInitialize = true;
-                                break;
-                            }
-                        }
-                        if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() != AllObjectManager.ObjectType.BOX)
-                        {
-                            dropTarget = obj.transform.position;
-                            dropTarget -= dropDirection;
-                            isDropInitialize = true;
-                            break;
-                        }
-
-                    }
-                }
-            }
-
-            // １マス隙間の場合は吹っ飛ばないようにする
-            if (Vector3.Distance(nextPosition, dropTarget) < 0.5f)
-            {
-                nextPosition = transform.position;
-                isDropInitialize = false;
-            }
-            else
-            {
-                // 段ボールを破壊可能かどうか
-                if (Vector3.Distance(dropInitialTarget, dropTarget) >= breakDistance)
-                {
-                    canBreakBox = true;
-                }
-
-                transform.position = nextPosition;
-
-                // 吹っ飛び開始
-                transform.DOMove(dropInitialTarget, 0.5f).SetEase(Ease.OutSine).OnComplete(FinishDropInitialize);
-            }
-        }
-    }
-    void FinishDropInitialize()
-    {
-        // フラグ初期化
-        isDropInitialize = false;
-        isDropping = true;
-
-        // 距離によって移動速度が変わらないように調整
-        float dropTime = Vector3.Distance(nextPosition, dropTarget) / dropAmount;
-
-        // 吹っ飛び開始
-        transform.DOMove(dropTarget, dropTime).SetEase(Ease.OutCirc).OnComplete(FinishDrop);
-    }
-    void Dropping()
+    void Explosion()
     {
         // 落下中の処理
-        if (isDropping)
+        if (isExplositionMove)
         {
             // 付近オブジェクトを検索
             foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
@@ -490,24 +389,11 @@ public class PlayerController : MonoBehaviour
 
                 if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                 {
-                    // 破壊の高さに足りているか
-                    if (canBreakAll)
+                    // 段ボールがあったら破壊する
+                    if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() != AllObjectManager.ObjectType.GROUND)
                     {
-                        // 段ボールがあったら破壊する
-                        if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() != AllObjectManager.ObjectType.GROUND)
-                        {
-                            Destroy(obj);
-                            break;
-                        }
-                    }
-                    else if (canBreakBox)
-                    {
-                        // 段ボールがあったら破壊する
-                        if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
-                        {
-                            obj.GetComponent<BoxManager>().DestroySelf(Vector3.down);
-                            break;
-                        }
+                        Destroy(obj);
+                        break;
                     }
                 }
             }
@@ -520,11 +406,7 @@ public class PlayerController : MonoBehaviour
         isJumping = false;
         isHovering = false;
         isGravity = true;
-        isDropInitialize = false;
-        isDropping = false;
         isPushing = false;
-        canBreakBox = false;
-        canBreakAll = false;
         isExplositionMove = false;
     }
     void ClampInCamera()
@@ -578,7 +460,7 @@ public class PlayerController : MonoBehaviour
     }
     public bool GetIsGround()
     {
-        if (isJumping || isHovering || isGravity || isDropInitialize || isDropping)
+        if (isJumping || isHovering || isGravity || isExplositionMove)
         {
             return false;
         }
@@ -630,77 +512,68 @@ public class PlayerController : MonoBehaviour
     // Setter
     public void SetExplosionMove(Vector3 _explosionMoveDirection)
     {
-        isDropping = false;
+        explosionTarget.x = Mathf.Round(transform.position.x);
+        explosionTarget.y = Mathf.Round(transform.position.y);
 
-        if (!isExplositionMove)
+        while (!isExplositionMove)
         {
-            dropTarget.x = Mathf.Round(transform.position.x);
-            dropTarget.y = Mathf.Round(transform.position.y);
+            // ブロックがなかったら次に進める
+            explosionTarget += _explosionMoveDirection;
 
-            while (!isDropping)
-            {
-                // ブロックがなかったら次に進める
-                dropTarget += _explosionMoveDirection;
-
-                // 吹っ飛びの終着点等を取得する
-                foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
-                {
-                    // X軸判定
-                    float xBetween = Mathf.Abs(dropTarget.x - obj.transform.position.x);
-                    float xDoubleSize = halfSize.x + 0.25f;
-
-                    // Y軸判定
-                    float yBetween = Mathf.Abs(dropTarget.y - obj.transform.position.y);
-                    float yDoubleSize = halfSize.y + 0.25f;
-
-                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
-                    {
-                        if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND)
-                        {
-                            dropTarget = obj.transform.position;
-                            dropTarget -= _explosionMoveDirection;
-                            isDropping = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            nextPosition = transform.position;
-
-            // 距離によって移動速度が変わらないように調整
-            float dropTime = Vector3.Distance(transform.position, dropTarget) / dropAmount;
-
-            // 吹っ飛び開始
-            transform.DOKill();
-            transform.DOMove(dropTarget, dropTime).SetEase(Ease.OutSine).OnComplete(FinishDrop);
-
-            // 隣にアクティブな段ボールがあったらそれも吹き飛ばす
+            // 吹っ飛びの終着点等を取得する
             foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
             {
                 // X軸判定
-                float xBetween = Mathf.Abs(Mathf.Round(transform.position.x) - _explosionMoveDirection.x - obj.transform.position.x);
+                float xBetween = Mathf.Abs(explosionTarget.x - obj.transform.position.x);
                 float xDoubleSize = halfSize.x + 0.25f;
 
                 // Y軸判定
-                float yBetween = Mathf.Abs(Mathf.Round(transform.position.y) - obj.transform.position.y);
+                float yBetween = Mathf.Abs(explosionTarget.y - obj.transform.position.y);
                 float yDoubleSize = halfSize.y + 0.25f;
 
                 if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                 {
-                    if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                    if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND)
                     {
-                        obj.transform.DOKill();
-                        obj.transform.DOMove(dropTarget - _explosionMoveDirection, dropTime).SetEase(Ease.OutSine).OnComplete(obj.GetComponent<BoxManager>().FinishExplosionMove);
-                        obj.GetComponent<BoxManager>().SetIsExplosionMove(_explosionMoveDirection, dropTarget - _explosionMoveDirection, dropTime);
+                        explosionTarget = obj.transform.position;
+                        explosionTarget -= _explosionMoveDirection;
+                        isExplositionMove = true;
                         break;
                     }
                 }
             }
+        }
 
-            // フラグ類
-            canBreakAll = true;
-            isExplositionMove = true;
+        nextPosition = transform.position;
+
+        // 距離によって移動速度が変わらないように調整
+        float dropTime = Vector3.Distance(transform.position, explosionTarget) / explosionAmount;
+
+        // 吹っ飛び開始
+        transform.DOKill();
+        transform.DOMove(explosionTarget, dropTime).SetEase(Ease.OutSine).OnComplete(FinishDrop);
+
+        // 隣にアクティブな段ボールがあったらそれも吹き飛ばす
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+        {
+            // X軸判定
+            float xBetween = Mathf.Abs(Mathf.Round(transform.position.x) - _explosionMoveDirection.x - obj.transform.position.x);
+            float xDoubleSize = halfSize.x + 0.25f;
+
+            // Y軸判定
+            float yBetween = Mathf.Abs(Mathf.Round(transform.position.y) - obj.transform.position.y);
+            float yDoubleSize = halfSize.y + 0.25f;
+
+            if (yBetween < yDoubleSize && xBetween < xDoubleSize)
+            {
+                if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                {
+                    obj.transform.DOKill();
+                    obj.transform.DOMove(explosionTarget - _explosionMoveDirection, dropTime).SetEase(Ease.OutSine).OnComplete(obj.GetComponent<BoxManager>().FinishExplosionMove);
+                    obj.GetComponent<BoxManager>().SetIsExplosionMove(_explosionMoveDirection, explosionTarget - _explosionMoveDirection, dropTime);
+                    break;
+                }
+            }
         }
     }
 }

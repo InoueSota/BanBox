@@ -1,6 +1,5 @@
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class BoxManager : MonoBehaviour
 {
@@ -15,6 +14,14 @@ public class BoxManager : MonoBehaviour
     // À•WŒn
     private Vector3 originPosition;
     private Vector3 nextPosition;
+
+    public enum BoxType
+    {
+        HORIZONTAL,
+        VERTICAL
+    }
+    [Header("ó‘Ô")]
+    [SerializeField] private BoxType boxType;
 
     // ‰Ÿ‚³‚ê‚Ä‚¢‚é‚©ƒtƒ‰ƒO
     private bool isBeingPushed;
@@ -146,6 +153,10 @@ public class BoxManager : MonoBehaviour
     public bool GetIsGravity()
     {
         return isGravity;
+    }
+    public BoxType GetBoxType()
+    {
+        return boxType;
     }
 
     // Setter
