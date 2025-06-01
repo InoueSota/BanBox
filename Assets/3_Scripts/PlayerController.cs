@@ -448,17 +448,17 @@ public class PlayerController : MonoBehaviour
             {
                 // XŽ²”»’è
                 float xBetween = Mathf.Abs(nextPosition.x - obj.transform.position.x);
-                float xDoubleSize = halfSize.x + 0.25f;
+                float xDoubleSize = halfSize.x - 0.01f;
 
                 // YŽ²”»’è
                 float yBetween = Mathf.Abs(nextPosition.y - 1f - obj.transform.position.y);
-                float yDoubleSize = halfSize.y + 0.25f;
+                float yDoubleSize = halfSize.y - 0.01f;
 
                 if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
                 {
                     if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
-                        if (obj.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL) { obj.GetComponent<BoxManager>().DestroySelf(Vector3.down); }
+                        if (obj.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL) { obj.GetComponent<BoxManager>().DestroySelf(Vector3.down); break; }
                     }
                 }
             }
@@ -606,6 +606,7 @@ public class PlayerController : MonoBehaviour
     {
         explosionTarget.x = Mathf.Round(transform.position.x);
         explosionTarget.y = Mathf.Round(transform.position.y);
+        transform.position = explosionTarget;
 
         while (!isExplositionMove)
         {
