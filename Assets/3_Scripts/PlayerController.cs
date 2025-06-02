@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     private PlayerManager manager;
     private bool isPushLeft;
     private bool isPushRight;
+    private bool isPushUp;
     private bool isPushDown;
     private bool isTriggerJump;
 
@@ -462,6 +463,27 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+        else if (!isPushing && !isExplositionMove && !isJumping && !isHovering && !isGravity && isPushUp)
+        {
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+            {
+                // XŽ²”»’è
+                float xBetween = Mathf.Abs(nextPosition.x - obj.transform.position.x);
+                float xDoubleSize = halfSize.x - 0.01f;
+
+                // YŽ²”»’è
+                float yBetween = Mathf.Abs(nextPosition.y + 1f - obj.transform.position.y);
+                float yDoubleSize = halfSize.y - 0.01f;
+
+                if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                {
+                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
+                    {
+                        if (obj.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL) { obj.GetComponent<BoxManager>().DestroySelf(Vector3.up); break; }
+                    }
+                }
+            }
+        }
     }
     void Explosion()
     {
@@ -532,6 +554,7 @@ public class PlayerController : MonoBehaviour
     {
         isPushLeft = false;
         isPushRight = false;
+        isPushUp = false;
         isPushDown = false;
         isTriggerJump = false;
 
@@ -545,6 +568,7 @@ public class PlayerController : MonoBehaviour
         if (manager.GetInputManager().IsPush(manager.GetInputManager().vertical))
         {
             if (manager.GetInputManager().ReturnInputValue(manager.GetInputManager().vertical) < -0.1f) { isPushDown = true; }
+            else if (manager.GetInputManager().ReturnInputValue(manager.GetInputManager().vertical) > 0.1f) { isPushUp = true; }
         }
         // ƒWƒƒƒ“ƒv
         if (manager.GetInputManager().IsTrgger(manager.GetInputManager().jump)) { isTriggerJump = true; }
