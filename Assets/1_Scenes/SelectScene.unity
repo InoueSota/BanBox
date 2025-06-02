@@ -277,7 +277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d76096d854b18142a0bec9424285bc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stageMax: 4
+  stageMax: 5
   worldCanvas: {fileID: 2044465168}
   stageNumberPrefab: {fileID: 4769776501893423304, guid: 33ea3df1fd189d44aad9eabc16463495, type: 3}
   stageNumberDistance: 5
