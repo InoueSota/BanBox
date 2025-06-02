@@ -1,5 +1,6 @@
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BoxManager : MonoBehaviour
 {
@@ -218,33 +219,123 @@ public class BoxManager : MonoBehaviour
     {
         isBeingPushed = true;
 
-        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+        bool finishCheck = false;
+        bool canPush = true;
+        Vector3 checkPosition = transform.position + _moveDirection;
+
+        while (!finishCheck)
         {
-            // X軸判定
-            float xBetween = Mathf.Abs(nextPosition.x + _moveDirection.x - obj.transform.position.x);
-            float xDoubleSize = halfSize.x + 0.5f;
+            bool empty = true;
 
-            // Y軸判定
-            float yBetween = Mathf.Abs(nextPosition.y - obj.transform.position.y);
-            float yDoubleSize = halfSize.y + 0.25f;
-
-            if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
             {
-                if (yBetween < yDoubleSize && xBetween < xDoubleSize)
+                // X軸判定
+                float xBetween = Mathf.Abs(checkPosition.x - obj.transform.position.x);
+                float xDoubleSize = halfSize.x + 0.25f;
+
+                // Y軸判定
+                float yBetween = Mathf.Abs(checkPosition.y - obj.transform.position.y);
+                float yDoubleSize = halfSize.y + 0.25f;
+
+                if (yBetween < yDoubleSize && xBetween < xDoubleSize && obj.GetComponent<AllObjectManager>().GetIsActive())
                 {
-                    // 段ボールに横から触れたとき
-                    BoxManager _objBoxManager = obj.GetComponent<BoxManager>();
-
-                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsDropping())
+                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND || obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BLOCK)
                     {
-                        transform.position = nextPosition;
+                        empty = false;
 
-                        obj.transform.DOMove(obj.transform.position + _moveDirection, _pushTime).SetEase(Ease.OutSine).OnComplete(_objBoxManager.FinishBeingPushed);
-                        _objBoxManager.SetIsBeingPushed(_moveDirection, _pushTime);
-                        break;
+                        foreach (GameObject obj2 in GameObject.FindGameObjectsWithTag("Object"))
+                        {
+                            // X軸判定
+                            float xBetween2 = Mathf.Abs(checkPosition.x - _moveDirection.x - obj2.transform.position.x);
+                            float xDoubleSize2 = halfSize.x + 0.25f;
+
+                            // Y軸判定
+                            float yBetween2 = Mathf.Abs(checkPosition.y - obj2.transform.position.y);
+                            float yDoubleSize2 = halfSize.y + 0.25f;
+
+                            if (yBetween2 < yDoubleSize2 && xBetween2 < xDoubleSize2 && obj2.GetComponent<AllObjectManager>().GetIsActive() && obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                            {
+                                if (obj2 == gameObject)
+                                {
+                                    canPush = false;
+                                    finishCheck = true;
+                                    break;
+                                }
+                                else if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.HORIZONTAL)
+                                {
+                                    finishCheck = true;
+                                    break;
+                                }
+                                else if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL)
+                                {
+                                    canPush = false;
+                                    finishCheck = true;
+                                    break;
+                                }
+                            }
+                        }
                     }
-                    else if (obj.GetComponent<AllObjectManager>().GetObjectType() != AllObjectManager.ObjectType.BOX)
+                    else if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !obj.GetComponent<BoxManager>().GetIsDropping()) { empty = false; }
+                }
+            }
+
+            // 空白の１マス
+            if (empty) { finishCheck = true; break; }
+
+            // 判定座標を進める
+            checkPosition += _moveDirection;
+        }
+
+        if (canPush)
+        {
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+            {
+                // X軸判定
+                float xBetween = Mathf.Abs(nextPosition.x + _moveDirection.x - obj.transform.position.x);
+                float xDoubleSize = halfSize.x + 0.5f;
+
+                // Y軸判定
+                float yBetween = Mathf.Abs(nextPosition.y - obj.transform.position.y);
+                float yDoubleSize = halfSize.y + 0.25f;
+
+                if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
+                {
+                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
+                        // 段ボールに横から触れたとき
+                        BoxManager _objBoxManager = obj.GetComponent<BoxManager>();
+
+                        if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsDropping())
+                        {
+                            transform.position = nextPosition;
+
+                            obj.transform.DOMove(obj.transform.position + _moveDirection, _pushTime).SetEase(Ease.OutSine).OnComplete(_objBoxManager.FinishBeingPushed);
+                            _objBoxManager.SetIsBeingPushed(_moveDirection, _pushTime);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
+            {
+                // X軸判定
+                float xBetween = Mathf.Abs(nextPosition.x + _moveDirection.x - obj.transform.position.x);
+                float xDoubleSize = halfSize.x + 0.5f;
+
+                // Y軸判定
+                float yBetween = Mathf.Abs(nextPosition.y - obj.transform.position.y);
+                float yDoubleSize = halfSize.y + 0.25f;
+
+                if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
+                {
+                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
+                    {
+                        // 段ボールに横から触れたとき
+                        BoxManager _objBoxManager = obj.GetComponent<BoxManager>();
+
                         DestroySelf(_moveDirection);
                     }
                 }
@@ -302,7 +393,7 @@ public class BoxManager : MonoBehaviour
     public void DestroySelf(Vector3 _moveDirection)
     {
         // 爆発移動
-        playerController.SetExplosionMove(-_moveDirection);
+        playerController.SetExplosionMove(gameObject, -_moveDirection);
 
         // 消去する
         Destroy(gameObject);

@@ -201,7 +201,6 @@ public class PlayerController : MonoBehaviour
     }
     void CheckPush(GameObject _obj)
     {
-        bool noBlock = true;
         bool finishCheck = false;
         bool canPush = true;
         Vector3 checkPosition = transform.position + moveDirection;
@@ -229,7 +228,7 @@ public class PlayerController : MonoBehaviour
                         foreach (GameObject obj2 in GameObject.FindGameObjectsWithTag("Object"))
                         {
                             // XŽ²”»’è
-                            float xBetween2 = Mathf.Abs(checkPosition.x - moveDirection.x - obj2.transform.position.x);
+                            float xBetween2 = Mathf.Abs(transform.position.x + moveDirection.x - obj2.transform.position.x);
                             float xDoubleSize2 = halfSize.x + 0.25f;
 
                             // YŽ²”»’è
@@ -263,7 +262,7 @@ public class PlayerController : MonoBehaviour
             checkPosition += moveDirection;
         }
 
-        if (noBlock && canPush)
+        if (canPush)
         {
             BoxManager _objBoxManager = null;
             if (_obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX) { _objBoxManager = _obj.GetComponent<BoxManager>(); }
@@ -602,7 +601,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // Setter
-    public void SetExplosionMove(Vector3 _explosionMoveDirection)
+    public void SetExplosionMove(GameObject _explosionObj, Vector3 _explosionMoveDirection)
     {
         explosionTarget.x = Mathf.Round(transform.position.x);
         explosionTarget.y = Mathf.Round(transform.position.y);
@@ -659,7 +658,7 @@ public class PlayerController : MonoBehaviour
 
             if (yBetween < yDoubleSize && xBetween < xDoubleSize)
             {
-                if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                if (obj != _explosionObj && obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
                 {
                     obj.transform.DOKill();
                     obj.transform.DOMove(explosionTarget - _explosionMoveDirection, dropTime).SetEase(Ease.OutSine).OnComplete(obj.GetComponent<BoxManager>().FinishExplosionMove);
