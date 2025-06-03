@@ -193,3 +193,4 @@ MonoBehaviour:
   horizontalBoxSprite: {fileID: 21300000, guid: df46277f6d4211041bc046f7c2876c56, type: 3}
   boxType: 1
   dropAmount: 5
+  particleObj: {fileID: 3246922032788748092, guid: d3f78045f4de521468b48b71c6572e52, type: 3}

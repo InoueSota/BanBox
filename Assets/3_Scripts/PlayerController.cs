@@ -68,6 +68,9 @@ public class PlayerController : MonoBehaviour
     private Vector3 explosionTarget;
     private bool isExplositionMove;
 
+    [Header("Particle")]
+    [SerializeField] private GameObject particleObj;
+
     void Start()
     {
         manager = GetComponent<PlayerManager>();
@@ -540,6 +543,10 @@ public class PlayerController : MonoBehaviour
                     // 段ボールがあったら破壊する
                     if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetObjectType() != AllObjectManager.ObjectType.GROUND)
                     {
+                        // Particleを出す
+                        GameObject particle = Instantiate(particleObj, obj.transform.position, Quaternion.identity);
+                        particle.GetComponent<SpawnExplosionParticle>().Initialize();
+
                         Destroy(obj);
                         break;
                     }

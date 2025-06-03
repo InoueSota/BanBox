@@ -80,6 +80,7 @@ MonoBehaviour:
   gravityMax: 12
   addGravity: 25
   explosionAmount: 16
+  particleObj: {fileID: 3246922032788748092, guid: d3f78045f4de521468b48b71c6572e52, type: 3}
 --- !u!114 &5535048817972948171
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,5 @@
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class BoxManager : MonoBehaviour
 {
@@ -39,6 +38,9 @@ public class BoxManager : MonoBehaviour
     [SerializeField] private float dropAmount;
     private Vector3 dropTarget;
     private bool isDropping;
+
+    [Header("Particle")]
+    [SerializeField] private GameObject particleObj;
 
     void Start()
     {
@@ -395,6 +397,10 @@ public class BoxManager : MonoBehaviour
     {
         // ”š”­ˆÚ“®
         playerController.SetExplosionMove(gameObject, -_moveDirection);
+
+        // Particle‚ğo‚·
+        GameObject particle = Instantiate(particleObj, transform.position, Quaternion.identity);
+        particle.GetComponent<SpawnExplosionParticle>().Initialize();
 
         // Á‹‚·‚é
         Destroy(gameObject);
