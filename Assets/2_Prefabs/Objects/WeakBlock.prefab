@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isActive: 1
-  objectType: 1
+  objectType: 3
 --- !u!114 &4304494174781013368
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -222,6 +222,7 @@ public class BoxManager : MonoBehaviour
         bool finishCheck = false;
         bool canPush = true;
         Vector3 checkPosition = transform.position + _moveDirection;
+        Vector3 checkPosition2 = transform.position + _moveDirection;
 
         while (!finishCheck)
         {
@@ -246,34 +247,31 @@ public class BoxManager : MonoBehaviour
                         foreach (GameObject obj2 in GameObject.FindGameObjectsWithTag("Object"))
                         {
                             // X軸判定
-                            float xBetween2 = Mathf.Abs(checkPosition.x - _moveDirection.x - obj2.transform.position.x);
-                            float xDoubleSize2 = halfSize.x + 0.25f;
+                            float xBetween2 = Mathf.Abs(checkPosition2.x - obj2.transform.position.x);
 
                             // Y軸判定
-                            float yBetween2 = Mathf.Abs(checkPosition.y - obj2.transform.position.y);
-                            float yDoubleSize2 = halfSize.y + 0.25f;
+                            float yBetween2 = Mathf.Abs(checkPosition2.y - obj2.transform.position.y);
 
-                            if (yBetween2 < yDoubleSize2 && xBetween2 < xDoubleSize2 && obj2.GetComponent<AllObjectManager>().GetIsActive() && obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                            if (yBetween2 < yDoubleSize && xBetween2 < xDoubleSize && obj2.GetComponent<AllObjectManager>().GetIsActive())
                             {
-                                if (obj2 == gameObject)
+                                if (obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND ||
+                                    obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BLOCK ||
+                                    obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.WEAK)
                                 {
                                     canPush = false;
                                     finishCheck = true;
                                     break;
                                 }
-                                else if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.HORIZONTAL)
+                                else if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxType.HORIZONTAL)
                                 {
-                                    finishCheck = true;
-                                    break;
-                                }
-                                else if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL)
-                                {
-                                    canPush = false;
                                     finishCheck = true;
                                     break;
                                 }
                             }
                         }
+
+                        // 判定座標を進める
+                        checkPosition2 += _moveDirection;
                     }
                     else if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !obj.GetComponent<BoxManager>().GetIsDropping()) { empty = false; }
                 }
@@ -348,7 +346,7 @@ public class BoxManager : MonoBehaviour
         CheckGround();
         nextPosition = transform.position;
     }
-    public void SetIsExplosionMove(Vector3 _explosionMoveDirection, Vector3 _position, float _pushTime)
+    public void SetIsExplosionMove(GameObject _explosionObj, Vector3 _explosionMoveDirection, Vector3 _position, float _pushTime)
     {
         isExplosionMove = true;
 
@@ -365,19 +363,22 @@ public class BoxManager : MonoBehaviour
 
             if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
             {
-                if (yBetween < yDoubleSize && xBetween < xDoubleSize)
+                if ((_explosionMoveDirection.x < 0f && _explosionObj.transform.position.x > obj.transform.position.x) || (_explosionMoveDirection.x > 0f && _explosionObj.transform.position.x < obj.transform.position.x))
                 {
-                    // 段ボールに横から触れたとき
-                    BoxManager _objBoxManager = obj.GetComponent<BoxManager>();
-
-                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsDropping())
+                    if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
-                        transform.position = nextPosition;
+                        // 段ボールに横から触れたとき
+                        BoxManager _objBoxManager = obj.GetComponent<BoxManager>();
 
-                        obj.transform.DOKill();
-                        obj.transform.DOMove(_position - _explosionMoveDirection, _pushTime).SetEase(Ease.OutSine).OnComplete(_objBoxManager.FinishExplosionMove);
-                        _objBoxManager.SetIsExplosionMove(_explosionMoveDirection, _position - _explosionMoveDirection, _pushTime);
-                        break;
+                        if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !_objBoxManager.GetIsDropping())
+                        {
+                            transform.position = nextPosition;
+
+                            obj.transform.DOKill();
+                            obj.transform.DOMove(_position - _explosionMoveDirection, _pushTime).SetEase(Ease.OutSine).OnComplete(_objBoxManager.FinishExplosionMove);
+                            _objBoxManager.SetIsExplosionMove(_explosionObj, _explosionMoveDirection, _position - _explosionMoveDirection, _pushTime);
+                            break;
+                        }
                     }
                 }
             }

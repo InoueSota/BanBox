@@ -8,7 +8,8 @@ public class AllObjectManager : MonoBehaviour
     {
         GROUND,
         BLOCK,
-        BOX
+        BOX,
+        WEAK,
     }
     [SerializeField] private ObjectType objectType;
 

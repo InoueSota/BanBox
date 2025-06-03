@@ -193,6 +193,9 @@ public class PlayerController : MonoBehaviour
 
                     if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
+                        // 軟弱ブロックの破壊フラグを立てる
+                        if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.WEAK) { obj.GetComponent<WeakBlockManager>().SetDisappear(); }
+
                         // プレイヤーが右側
                         if (nextPosition.x > obj.transform.position.x)
                         {
@@ -221,6 +224,7 @@ public class PlayerController : MonoBehaviour
         bool finishCheck = false;
         bool canPush = true;
         Vector3 checkPosition = transform.position + moveDirection;
+        Vector3 checkPosition2 = transform.position + moveDirection;
 
         while (!finishCheck)
         {
@@ -238,35 +242,40 @@ public class PlayerController : MonoBehaviour
 
                 if (yBetween < yDoubleSize && xBetween < xDoubleSize && obj.GetComponent<AllObjectManager>().GetIsActive())
                 {
-                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND || obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BLOCK)
+                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND ||
+                        obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BLOCK ||
+                        obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.WEAK)
                     {
                         empty = false;
 
                         foreach (GameObject obj2 in GameObject.FindGameObjectsWithTag("Object"))
                         {
                             // X軸判定
-                            float xBetween2 = Mathf.Abs(transform.position.x + moveDirection.x - obj2.transform.position.x);
-                            float xDoubleSize2 = halfSize.x + 0.25f;
+                            float xBetween2 = Mathf.Abs(checkPosition2.x - obj2.transform.position.x);
 
                             // Y軸判定
-                            float yBetween2 = Mathf.Abs(checkPosition.y - obj2.transform.position.y);
-                            float yDoubleSize2 = halfSize.y + 0.25f;
+                            float yBetween2 = Mathf.Abs(checkPosition2.y - obj2.transform.position.y);
 
-                            if (yBetween2 < yDoubleSize2 && xBetween2 < xDoubleSize2 && obj2.GetComponent<AllObjectManager>().GetIsActive() && obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
+                            if (yBetween2 < yDoubleSize && xBetween2 < xDoubleSize && obj2.GetComponent<AllObjectManager>().GetIsActive())
                             {
-                                if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.HORIZONTAL)
-                                {
-                                    finishCheck = true;
-                                    break;
-                                }
-                                else if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL)
+                                if (obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND ||
+                                    obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BLOCK ||
+                                    obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.WEAK)
                                 {
                                     canPush = false;
                                     finishCheck = true;
                                     break;
                                 }
+                                else if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.HORIZONTAL)
+                                {
+                                    finishCheck = true;
+                                    break;
+                                }
                             }
                         }
+
+                        // 判定座標を進める
+                        checkPosition2 += moveDirection;
                     }
                     else if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX && !obj.GetComponent<BoxManager>().GetIsDropping()) { empty = false; }
                 }
@@ -322,6 +331,9 @@ public class PlayerController : MonoBehaviour
 
                     if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
                     {
+                        // 軟弱ブロックの破壊フラグを立てる
+                        if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.WEAK) { obj.GetComponent<WeakBlockManager>().SetDisappear(); }
+
                         jumpTarget = nextPosition.y + jumpDistance;
                         isJumping = true;
                         break;
@@ -407,6 +419,9 @@ public class PlayerController : MonoBehaviour
                         {
                             if (obj.GetComponent<AllObjectManager>().GetIsActive() && obj.GetComponent<AllObjectManager>().GetIsHitObject())
                             {
+                                // 軟弱ブロックの破壊フラグを立てる
+                                if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.WEAK) { obj.GetComponent<WeakBlockManager>().SetDisappear(); }
+
                                 noBlock = false;
                                 break;
                             }
@@ -447,6 +462,9 @@ public class PlayerController : MonoBehaviour
 
                         if (yBetween <= yDoubleSize && xBetween < xDoubleSize)
                         {
+                            // 軟弱ブロックの破壊フラグを立てる
+                            if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.WEAK) { obj.GetComponent<WeakBlockManager>().SetDisappear(); }
+
                             nextPosition.y = obj.transform.position.y + 0.5f + halfSize.y;
                             isGravity = false;
                             break;
@@ -718,7 +736,7 @@ public class PlayerController : MonoBehaviour
                 {
                     obj.transform.DOKill();
                     obj.transform.DOMove(explosionTarget - _explosionMoveDirection, dropTime).SetEase(Ease.OutSine).OnComplete(obj.GetComponent<BoxManager>().FinishExplosionMove);
-                    obj.GetComponent<BoxManager>().SetIsExplosionMove(_explosionMoveDirection, explosionTarget - _explosionMoveDirection, dropTime);
+                    obj.GetComponent<BoxManager>().SetIsExplosionMove(_explosionObj, _explosionMoveDirection, explosionTarget - _explosionMoveDirection, dropTime);
                     break;
                 }
             }
