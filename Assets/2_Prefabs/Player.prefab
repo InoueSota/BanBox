@@ -62,6 +62,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 336aec4103639ee4f9dffc5d87615f62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  centerSprite: {fileID: 1075993247170539406, guid: 0941db605d0e1b74694f81bb448303a4, type: 3}
+  downSprite: {fileID: 3463857228526754693, guid: 0941db605d0e1b74694f81bb448303a4, type: 3}
+  upSprite: {fileID: 7196534093254501055, guid: 0941db605d0e1b74694f81bb448303a4, type: 3}
+  explosionVerticalSprite: {fileID: 5076971892968362947, guid: 0941db605d0e1b74694f81bb448303a4, type: 3}
+  moveSprite: {fileID: 4516387037990142955, guid: 0941db605d0e1b74694f81bb448303a4, type: 3}
+  pushSprite: {fileID: 683826753, guid: 0941db605d0e1b74694f81bb448303a4, type: 3}
+  explosionHorizontalSprite: {fileID: 1435837993, guid: 0941db605d0e1b74694f81bb448303a4, type: 3}
   maxSpeed: 3.7
   maxAcceleration: 2.2
   accelerationTime: 0.6
@@ -129,8 +136,8 @@ SpriteRenderer:
   m_SortingLayerID: 1882411411
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: df46277f6d4211041bc046f7c2876c56, type: 3}
-  m_Color: {r: 0.6901961, g: 0.18631943, b: 0.14117646, a: 1}
+  m_Sprite: {fileID: 1075993247170539406, guid: 0941db605d0e1b74694f81bb448303a4, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

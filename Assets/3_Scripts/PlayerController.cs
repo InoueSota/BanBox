@@ -3,13 +3,25 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    // 自コンポーネント取得
+    // My Component
+
     private PlayerManager manager;
     private bool isPushLeft;
     private bool isPushRight;
     private bool isPushUp;
     private bool isPushDown;
     private bool isTriggerJump;
+
+    // Sprite
+    private SpriteRenderer spriteRenderer;
+    [Header("Sprite")]
+    [SerializeField] private Sprite centerSprite;
+    [SerializeField] private Sprite downSprite;
+    [SerializeField] private Sprite upSprite;
+    [SerializeField] private Sprite explosionVerticalSprite;
+    [SerializeField] private Sprite moveSprite;
+    [SerializeField] private Sprite pushSprite;
+    [SerializeField] private Sprite explosionHorizontalSprite;
 
     // 基本情報
     private Vector2 halfSize;
@@ -59,6 +71,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         manager = GetComponent<PlayerManager>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         halfSize.x = transform.localScale.x * 0.5f;
         halfSize.y = transform.localScale.y * 0.5f;
@@ -98,6 +111,7 @@ public class PlayerController : MonoBehaviour
             Explosion();
 
             ClampInCamera();
+            ChangeSprite();
 
             transform.position = nextPosition;
         }
@@ -112,10 +126,12 @@ public class PlayerController : MonoBehaviour
             if (isPushLeft)
             {
                 moveDirection = Vector3.left;
+                spriteRenderer.flipX = true;
             }
             else if (isPushRight)
             {
                 moveDirection = Vector3.right;
+                spriteRenderer.flipX = false;
             }
         }
         else
@@ -238,7 +254,7 @@ public class PlayerController : MonoBehaviour
 
                             if (yBetween2 < yDoubleSize2 && xBetween2 < xDoubleSize2 && obj2.GetComponent<AllObjectManager>().GetIsActive() && obj2.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BOX)
                             {
-                                if(obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.HORIZONTAL)
+                                if (obj2.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.HORIZONTAL)
                                 {
                                     finishCheck = true;
                                     break;
@@ -548,6 +564,17 @@ public class PlayerController : MonoBehaviour
             isJumping = false;
         }
     }
+    void ChangeSprite()
+    {
+        if (!isExplositionMove)
+        {
+            if (isPushing) { spriteRenderer.sprite = pushSprite; }
+            else if (isPushLeft || isPushRight) { spriteRenderer.sprite = moveSprite; }
+            else if (isPushUp) { spriteRenderer.sprite = upSprite; }
+            else if (isPushDown) { spriteRenderer.sprite = downSprite; }
+            else { spriteRenderer.sprite = centerSprite; }
+        }
+    }
 
     // Getter
     void GetInput()
@@ -653,6 +680,11 @@ public class PlayerController : MonoBehaviour
                     {
                         explosionTarget = obj.transform.position;
                         explosionTarget -= _explosionMoveDirection;
+
+                        // Sprite
+                        if (Mathf.Abs(_explosionMoveDirection.x) > 0f) { spriteRenderer.sprite = explosionHorizontalSprite; }
+                        else { spriteRenderer.sprite = explosionVerticalSprite; }
+
                         isExplositionMove = true;
                         break;
                     }
