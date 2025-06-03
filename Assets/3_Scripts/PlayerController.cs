@@ -516,7 +516,7 @@ public class PlayerController : MonoBehaviour
                 {
                     if (yBetween < yDoubleSize && xBetween < xDoubleSize)
                     {
-                        if (obj.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL) { obj.GetComponent<BoxManager>().DestroySelf(Vector3.up); break; }
+                        if (!obj.GetComponent<BoxManager>().GetOnPlayer() && obj.GetComponent<BoxManager>().GetBoxType() == BoxManager.BoxType.VERTICAL) { obj.GetComponent<BoxManager>().DestroySelf(Vector3.up); break; }
                     }
                 }
             }

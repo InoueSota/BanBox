@@ -34,6 +34,9 @@ public class BoxManager : MonoBehaviour
     // 吹っ飛んでいるかフラグ
     private bool isExplosionMove;
 
+    // プレイヤーの上に乗っているかフラグ
+    private bool onPlayer;
+
     [Header("落下")]
     [SerializeField] private float dropAmount;
     private Vector3 dropTarget;
@@ -88,6 +91,7 @@ public class BoxManager : MonoBehaviour
     {
         // ブロックとの衝突判定
         bool noBlock = true;
+        onPlayer = false;
 
         foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Object"))
         {
@@ -128,6 +132,7 @@ public class BoxManager : MonoBehaviour
 
             if (yBetween < yDoubleSize && xBetween < xDoubleSize)
             {
+                onPlayer = true;
                 noBlock = false;
             }
         }
@@ -214,6 +219,10 @@ public class BoxManager : MonoBehaviour
     public BoxType GetBoxType()
     {
         return boxType;
+    }
+    public bool GetOnPlayer()
+    {
+        return onPlayer;
     }
 
     // Setter
