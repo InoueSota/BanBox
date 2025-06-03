@@ -251,7 +251,9 @@ public class BoxManager : MonoBehaviour
 
                 if (yBetween < yDoubleSize && xBetween < xDoubleSize && obj.GetComponent<AllObjectManager>().GetIsActive())
                 {
-                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND || obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BLOCK)
+                    if (obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.GROUND ||
+                        obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.BLOCK ||
+                        obj.GetComponent<AllObjectManager>().GetObjectType() == AllObjectManager.ObjectType.WEAK)
                     {
                         empty = false;
 
